@@ -1,1 +1,60 @@
 # Azure-IP-Addressing-and-SNAT
+In this article, we are going to talk about Azure IP addressing behavior and SNAT options. I often get asked, if my Azure VM only has a private IP, what IP address will it use for outbound connections and how can I choose that IP and whitelist it. We are going to go over a few topics concerning Azure IP addressing, SNAT, checking your IP and some alternative solutoins for whitelisting Azure VIPs.
+
+# Azure IP Addressing
+```bash
+As we know in networking, the forumula to calcuate the # of hosts in a given subnet is as follows:
+# Subnet Hosts = [2^(# host bits)] -2 (-2 being your broadcast and default address, 0.0.0.0/255.255.255.255)
+
+Azure adheres to this, but takes an additonal three bits per subnet as well, so the above formula becomes:
+# Subnet Hosts = [2 ^ (# host bits)] –2 – 3
+
+# Some simple examples
+If you have a [/27] network, you can fit [2^(32 – 27)] – 5 == 27 resources
+If you have a [/28] network, you can fit [2^(32 – 28)] – 5 ==  11 resources
+If you have a [/29] network, you can fit [2^(32 – 29)] – 5 == 3 resources
+```
+We can use the above then to know in a given subnet, Azure will assign .4 and .5 as the first addresses. This also holds true for VPN or ExR GW, which we don't expose those addresses in the UI. Either .4 or .5 will be pingable, and both should be if the GW is setup for A/A for VPN.
+
+# The Pseudo-VIP
+Some background, any resource in Azure will have a public IP programmed for SNAT. Even if the VM is assinged a private IP (DIP), the Azure platform will still assign a platfrom generated public IP so the resource can communicate outside the VNET. The easist way to check that VIP in both Windows and Linux, is to simply run curl ifconfig.me (in bash or cmd)
+```bash
+C:\Windows\system32>ipconfig                                                    
+                                                                                
+Windows IP Configuration                                                        
+                                                                                
+                                                                                
+Ethernet adapter Ethernet:                                                      
+                                                                                
+   Connection-specific DNS Suffix  . : vxtyv5ak24ietmdv15r0ycyipa.bx.internal.cl
+oudapp.net                                                                      
+   Link-local IPv6 Address . . . . . : fe80::fd13:9d2c:7a15:542d%6              
+   IPv4 Address. . . . . . . . . . . : 10.2.0.5                                 
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0                            
+   Default Gateway . . . . . . . . . : 10.2.0.1                                 
+                                                                                
+C:\Windows\system32>curl ifconfig.me                                            
+40.76.244.175
+```
+We can see the platform assigned 40.76.244.175, even though this VM only as a DIP assigned
+
+![image](https://user-images.githubusercontent.com/55964102/193902852-3f484eed-30b7-439d-98ce-1a9b1113f17a.png)
+
+# Azure SNAT
+From the above snippet, as explained the platform assigned that address to provide outbound connections. Azure will use this address for SNAT connections leaving the VNET. Often customers will have many VMs only with a DIP, and they don't want to whitelist many VIP addresses. Technically these addresses will never change, as long as the instance is not deallocated. There are two easy workarounds to provide a group of VMs a single outbound addresses for SNAT for whitelisting purposes:
+
+1. Create an Azure SLB in portal. By default the SLB will not program SNAT until you create a LB rule. Customers often don't like this solution, because they don't want to open a LB rule from the internet for exposure. As long as as dummy high number port is created and nothing is listening on that port, that will be sufficeint to program SNAT and all VMs in the load balancer back-end pool will use that Front-End IP for outbound connections:
+
+![image](https://user-images.githubusercontent.com/55964102/193906089-e61fcfa9-181f-4dc2-a56d-2bdfbdbfc149.png)
+
+2. The second option is NAT-GW. This will serve the same function as the SLB, and all VMs in the given subnet will SNAT to the given NAT-GW IP address for outbound connections. The advantage is that you don't need to create a dummy LB rule to program SNAT for NAT-GW. It also important to note, this can be combined with SLB above, but NAT-GW will take precendance over SLB for SNAT, even with outbound rules:
+
+![image](https://user-images.githubusercontent.com/55964102/193907285-bbd51526-1e7d-4110-aedd-ab05147d4d3a.png)
+
+Public docs on defualt outbound access in Azure
+
+https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/default-outbound-access
+
+# Conclusion
+From this article we can confirm basic concepts of Azure IP addressing, check a VMs platform provided SNAT addresses, and two alternatives to providing a single outbound address for SNAT in order to prevent whitelisting of many IPs that may be needed for an application. 
+
