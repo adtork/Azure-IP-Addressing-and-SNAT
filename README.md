@@ -49,7 +49,7 @@ From the above snippet, as explained the platform assigned that address to provi
 
 2. The second option is NAT-GW. This will serve the same function as the SLB, and all VMs in the given subnet will SNAT to the given NAT-GW IP address for outbound connections. The advantage is that you don't need to create a dummy LB rule to program SNAT for NAT-GW. It also important to note, this can be combined with SLB above, but NAT-GW will take precendance over SLB for SNAT, even with outbound rules:
 
-![image](https://user-images.githubusercontent.com/55964102/193907285-bbd51526-1e7d-4110-aedd-ab05147d4d3a.png)
+![image](https://user-images.githubusercontent.com/55964102/193908654-54ba6673-0d65-41c8-9f6f-85ec098bd91c.png)
 
 Public docs on defualt outbound access in Azure
 
