@@ -17,7 +17,7 @@ If you have a [/29] network, you can fit [2^(32 – 29)] – 5 == 3 resources
 We can use the above then to know in a given subnet, Azure will assign .4 and .5 as the first addresses. This also holds true for VPN or ExR GW, which we don't expose those addresses in the UI. Either .4 or .5 will be pingable, and both should be if the GW is setup for A/A for VPN.
 
 # The Pseudo-VIP
-Some background, any resource in Azure will have a public IP programmed for SNAT. Even if the VM is assinged a private IP (DIP), the Azure platform will still assign a platfrom generated public IP so the resource can communicate outside the VNET. Azure assings this based on the given region the VM is in, and will assign a public IP prefix based on that region. You will not be able to choose this address if you don't create the public IP manually. The easist way to check that VIP in both Windows and Linux, is to simply run curl ifconfig.me (in bash or cmd)
+Some background, any resource in Azure will have a public IP programmed for SNAT. Even if the VM is assinged a private IP (DIP), the Azure platform will still assign a platfrom generated public IP so the resource can communicate outside the VNET. Azure assigns this based on the given region the VM is in, and will assign a public IP prefix based on that region. You will not be able to choose this address if you don't create the public IP manually. The easist way to check that VIP in both Windows and Linux, is to simply run curl ifconfig.me (in bash or cmd)
 ```bash
 C:\Windows\system32>ipconfig                                                    
                                                                                 
