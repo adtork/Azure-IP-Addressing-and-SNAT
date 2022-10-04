@@ -6,7 +6,7 @@ In this article, we are going to talk about Azure IP addressing behavior and SNA
 As we know in networking, the forumula to calcuate the # of hosts in a given subnet is as follows:
 # Subnet Hosts = [2^(# host bits)] -2 (-2 being your broadcast and default address, 0.0.0.0/255.255.255.255)
 
-Azure adheres to this, but takes an additonal three bits per subnet as well, so the above formula becomes:
+Azure adheres to this, but takes an additonal three IPs per subnet as well, so the above formula becomes:
 # Subnet Hosts = [2 ^ (# host bits)] –2 – 3
 
 # Some simple examples
