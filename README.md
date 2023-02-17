@@ -51,8 +51,10 @@ The second option is NAT-GW. This will serve the same function as the SLB, and a
 
 ![image](https://user-images.githubusercontent.com/55964102/193910886-234b697f-5950-4e09-8c66-e9e9da08bec8.png)
 
-Public docs on defualt outbound access in Azure
 
+The third option is to simply use a VM or NVA with a public IP, not really recommended for security reasons, or use a VM without a public IP and SNAT will be providedw with the pseduo VIP as explained above. If you don't want those options, SLB or Azure NAT Gateway are the bettter options! 
+
+Public docs on defualt outbound access in Azure
 https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/default-outbound-access
 
 # Conclusion
