@@ -54,8 +54,8 @@ The second option is NAT-GW. This will serve the same function as the SLB, and a
 
 The third option is to simply use a VM or NVA with a public IP, not really recommended for security reasons, or use a VM without a public IP and SNAT will be providedw with the pseduo VIP as explained above. If you don't want those options, SLB or Azure NAT Gateway are the bettter options! 
 
-Public docs on defualt outbound access in Azure
-https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/default-outbound-access
+Public docs on defualt outbound access in Azure:
+[SNAT Behavior](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/default-outbound-access)
 
 # Conclusion
 From this article we can confirm basic concepts of Azure IP addressing, check a VMs platform provided SNAT addresses, and two alternatives to providing a single outbound address for SNAT in order to prevent whitelisting of many IPs that may be needed for an application. 
