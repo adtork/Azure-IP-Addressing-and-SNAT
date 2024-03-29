@@ -48,7 +48,7 @@ From the above snippet, as explained the platform assigned that address to provi
 Option 1:
 <Br>
 <Br>
-Simply adding a public IP to the VM. This is discouraged due to inherint security risks of port scans and exposure if not properly locked down with NSGs or an Azure firewall/NVA. Generally speaking, using public IPs should be kept to a minimum in production environments. The better option is to use Azure Bastion, serial console access or VPN to access virutal machines.
+Simply adding a public IP to the VM. This is discouraged due to inherint security risks of port scans and exposure if not properly locked down with NSGs or an Azure firewall/NVA. This also does not scale well based on the number of VMs in the vnet. Generally speaking, using public IPs should be kept to a minimum in production environments. The better option is to use Azure Bastion, serial console access or VPN to access virutal machines.
 ![image](https://github.com/adtork/Azure-IP-Addressing-and-SNAT/assets/55964102/4073d3a1-7c50-4d1f-9919-c9c31e228e23)
 <Br>
 <Br>
@@ -60,14 +60,20 @@ Creating an external load balancer (ELB) and front-end IP address and port. Once
 <Br>
 Option 3:
 <Br>
-The best option for pure snat port allocation is Nat-GW. This will use the full 64K port range and provide maximum number of snat ports for outbound access. A Nat-GW can be chained with an ELB per above, but the Nat-GW will take over the job of the ELB and use its front-end IPs for Snat. Nat-GWs are also used in conjunction with Azure Firewealls, which is sort of a 4th option to provide outbound access. Resources residing behind an AzFW will SNAT to the firewalls public IP(s).
+The best option for pure snat port allocation is Nat-GW. This will use the full 64K port range and provide maximum number of snat ports for outbound access. A Nat-GW can be chained with an ELB per above, but the Nat-GW will take over the job of the ELB and use its front-end IPs for Snat. Nat-GWs are also used in conjunction with Azure Firewalls, which is sort of a 4th option to provide outbound access. Resources residing behind an AzFW will SNAT to the firewalls public IP(s), unless chained with Nat-GW.
 ![image](https://github.com/adtork/Azure-IP-Addressing-and-SNAT/assets/55964102/d1c0b4b1-e731-4020-8b48-5cf4a431f30b)
 
 
 More Info on outbound access, SLB and Nat-GW in Azure:
 <br>
-[SNAT Behavior](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/default-outbound-access)
+[Azure SNAT Behavior](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/default-outbound-access)
+<br>
+[Nat Gateway](https://learn.microsoft.com/en-us/azure/nat-gateway/nat-gateway-resource).
+<br>
+[AzFw Chained with NatGW](https://learn.microsoft.com/en-us/azure/firewall/integrate-with-nat-gateway).
+<br>
+[Software Load balancer Outbound Behavior](https://learn.microsoft.com/en-us/azure/load-balancer/load-balancer-outbound-connections).
 
 # Conclusion
-From this article we can confirm basic concepts of Azure IP addressing, check a VMs platform provided SNAT addresses, and two alternatives to providing a single outbound address for SNAT in order to prevent whitelisting of many IPs that may be needed for an application. 
+From this article we can confirm basic concepts of Azure IP addressing, check a VMs platform provided SNAT addresses, and three alternatives to providing external access to virtual machines residing in virutal networks. 
 
