@@ -18,7 +18,7 @@ and so on...
 We can use the above then to know in a given subnet, Azure will assign .4 and .5 as the first usable addresses. This also holds true for VPN or ExR GW for example, even though these are not visable inside the Azure Network allocated addresses visible in the portal.
 
 # The Pseudo-VIP
-Some background, any resource in Azure will have a public IP programmed for SNAT. If the VM is assinged a private IP (DIP), the Azure platform will still assign a platfrom generated public IP so the resource can communicate external to the VNET. Azure assigns this based on the given region the VM is in, and will assign a public IP address based on that region. The easist way to check that VIP in both Windows and Linux, is to simply run curl ifconfig.me or culr ifconfig.io (in bash or cmd)
+Some background, any resource in Azure will have a public IP programmed for SNAT. If the VM is assinged a private IP (DIP), the Azure platform will still assign a platfrom generated public IP so the resource can communicate external to the VNET. Azure assigns this based on the given region the VM is in, and will assign a public IP address based on that region. Its important to note though, this behavior will be changing as th below articles mentions in 2025. At the time of this article, the azure platform will still assign a psuedo VIP. The easist way to check that VIP in both Windows and Linux, is to simply run curl ifconfig.me or culr ifconfig.io (in bash or cmd)
 ```bash
 
 C:\Windows\system32>curl ifconfig.me                                            
@@ -60,7 +60,7 @@ Creating an external load balancer (ELB) and front-end IP address and port. Once
 <Br>
 Option 3:
 <Br>
-The best option for pure snat port allocation is Nat-GW. This will use the full 65K port range and provide maximum number of snat ports for outbound access. A Nat-GW can be chained with an ELB per above, but the Nat-GW will take over the job of the ELB and use its front-end IPs for Snat. Nat-GWs are also used in conjunction with Azure Firewealls, which is sort of a 4th option to provide outbound access. Resources residing behind an AzFW will SNAT to the firewalls public IP(s).
+The best option for pure snat port allocation is Nat-GW. This will use the full 64K port range and provide maximum number of snat ports for outbound access. A Nat-GW can be chained with an ELB per above, but the Nat-GW will take over the job of the ELB and use its front-end IPs for Snat. Nat-GWs are also used in conjunction with Azure Firewealls, which is sort of a 4th option to provide outbound access. Resources residing behind an AzFW will SNAT to the firewalls public IP(s).
 ![image](https://github.com/adtork/Azure-IP-Addressing-and-SNAT/assets/55964102/d1c0b4b1-e731-4020-8b48-5cf4a431f30b)
 
 
