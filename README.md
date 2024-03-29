@@ -1,7 +1,7 @@
 # Azure-IP-Addressing-and-SNAT
-In this article, we are going to talk about Azure IP addressing behavior and SNAT options. I often get asked, if my Azure VM only has a private IP, what IP address will it use for outbound connections, and how can I choose that IP and whitelist it? We are going to go over a few topics concerning Azure IP addressing, SNAT, checking your public IP and some alternative solutoins for whitelisting Azure VIPs.
+In this article, we are going to talk about Azure IP addressing behavior and SNAT options. I often get asked what will be the first usable IP assigned to my VM in my subnet? The second question I often get, my VM does not have a public IP, how does it communicate outside the virtual network and can I choose that IP, what will it be? 
 
-# Azure IP Addressing
+# Basic Azure IP Addressing
 ```bash
 As we know in networking, the forumula to calcuate the # of hosts in a given subnet is as follows:
 # Subnet Hosts = [2^(# host bits)] -2 (-2 being your broadcast and default address, 0.0.0.0/255.255.255.255)
@@ -15,10 +15,12 @@ If you have a [/28] network, you can fit [2^(32 – 28)] – 5 ==  11 resources
 If you have a [/29] network, you can fit [2^(32 – 29)] – 5 == 3 resources
 and so on...
 ```
-We can use the above then to know in a given subnet, Azure will assign .4 and .5 as the first usable addresses. This also holds true for VPN or ExR GW for example, even though these are not visable inside the Azure Network allocated addresses visible in the portal.
+We can use the above then to know in a given subnet, Azure will assign .4 and .5 as the first usable addresses. This also holds true for VPN or ExR GW for example, even though these are not visable inside the Azure Network allocated resources of the virutal network. The answer to the second question is the azure platform assigned psuedo vip, which is assinged based on vm region. 
 
 # The Pseudo-VIP
-Some background, any resource in Azure will have a public IP programmed for SNAT. If the VM is assinged a private IP (DIP), the Azure platform will still assign a platfrom generated public IP so the resource can communicate external to the VNET. Azure assigns this based on the given region the VM is in, and will assign a public IP address based on that region. Its important to note though, this behavior will be changing as th below articles mentions in 2025. At the time of this article, the azure platform will still assign a psuedo VIP. The easist way to check that VIP in both Windows and Linux, is to simply run curl ifconfig.me or culr ifconfig.io (in bash or cmd)
+Some background, any resource in Azure will have a public IP programmed for SNAT. If the VM is assinged a private IP (DIP), the Azure platform will still assign a platfrom generated public IP so the resource can communicate external to the VNET. Azure assigns this based on the given region the VM is in, and will assign a public IP address based on that region. 
+> [!NOTE]
+>It's important to note though, this behavior will be changing as the [below](https://learn.microsoft.com/en-us/azure/virtual-network/ip-services/default-outbound-access) article mentions in 2025. At the time of this article, the azure platform will still assign a psuedo VIP. The easist way to check that VIP in both Windows and Linux, is to simply run curl ifconfig.me or curl ifconfig.io (in bash or cmd)
 ```bash
 
 C:\Windows\system32>curl ifconfig.me                                            
@@ -48,7 +50,8 @@ From the above snippet, as explained the platform assigned that address to provi
 Option 1:
 <Br>
 <Br>
-Simply adding a public IP to the VM. This is discouraged due to inherint security risks of port scans and exposure if not properly locked down with NSGs or an Azure firewall/NVA. This also does not scale well based on the number of VMs in the vnet. Generally speaking, using public IPs should be kept to a minimum in production environments. The better option is to use Azure Bastion, serial console access or VPN to access virutal machines.
+Simply adding a public IP to the VM. This is discouraged due to inherint security risks of port scans and exposure if not properly locked down with NSGs or an Azure firewall/NVA. This also does not scale well based on the number of VMs in the virtual network. Generally speaking, using public IPs should be kept to a minimum in production environments. The better option is to use Azure Bastion, serial console access or VPN to access virutal machines.
+<Br>
 ![image](https://github.com/adtork/Azure-IP-Addressing-and-SNAT/assets/55964102/4073d3a1-7c50-4d1f-9919-c9c31e228e23)
 <Br>
 <Br>
@@ -60,7 +63,7 @@ Creating an external load balancer (ELB) and front-end IP address and port. Once
 <Br>
 Option 3:
 <Br>
-The best option for pure snat port allocation is Nat-GW. This will use the full 64K port range and provide maximum number of snat ports for outbound access. A Nat-GW can be chained with an ELB per above, but the Nat-GW will take over the job of the ELB and use its front-end IPs for Snat. Nat-GWs are also used in conjunction with Azure Firewalls, which is sort of a 4th option to provide outbound access. Resources residing behind an AzFW will SNAT to the firewalls public IP(s), unless chained with Nat-GW.
+The best option for pure snat port allocation is Nat-GW. This will use the full 64K port range and provide maximum number of snat ports for outbound access. A Nat-GW can be chained with an ELB per above, but the Nat-GW will take over the job of the ELB and use its front-end IPs for Snat. Nat-GWs can also used in conjunction with Azure Firewalls, which is sort of a 4th option to provide outbound access. Resources residing behind an AzFW will SNAT to the firewalls public IP(s), unless chained with a Nat-GW.
 ![image](https://github.com/adtork/Azure-IP-Addressing-and-SNAT/assets/55964102/d1c0b4b1-e731-4020-8b48-5cf4a431f30b)
 
 
